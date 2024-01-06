@@ -1,14 +1,18 @@
 import librosa
 import matplotlib.pyplot as plt
 import colorednoise as cn
+import numpy as np
+import glob
 
 filename = "RawAudio/output.wav"
 original_signal, sr = librosa.load(filename)
 
 def plot_signals_wave(signal_one, signal_two):
-    """Plot and show two signals as waveforms on top of each other for comparison.
-    Uses librosa library.
-    https://github.com/librosa/librosa
+    """Plot and show two signals as waveforms on top of each other for 
+        comparison.
+
+    Uses librosa library - https://github.com/librosa/librosa.
+    Uses matplotlib library - https://github.com/matplotlib/matplotlib.
 
     Parameters:
     -----------
@@ -31,8 +35,8 @@ def plot_signals_wave(signal_one, signal_two):
 
 def normalisation(signal):
     """Apply normalisation to signal.
-    Uses librosa library.
-    https://github.com/librosa/librosa
+
+    Uses librosa library - https://github.com/librosa/librosa.
 
     Parameters:
     -----------
@@ -49,8 +53,8 @@ def normalisation(signal):
 
 def apply_noise(colour, signal):
     """Apply some colours of noise to signal.
-    Uses colorednoise library.
-    https://github.com/felixpatzelt/colorednoise/
+
+    Uses colorednoise library - https://github.com/felixpatzelt/colorednoise.
 
     Parameters:
     -----------
@@ -81,18 +85,57 @@ def apply_noise(colour, signal):
     augmented_signal = signal + noise * noise_factor
     return augmented_signal
 
+def apply_all_preprocessing(path):
+    """Apply all preprocessing steps to all .wav files in the specified 
+        directory and subdirectories.
+        Outputs a mel-frequency-spectrogram into the same directory the audio 
+        file was taken from.
+
+        Uses librosa library - https://github.com/librosa/librosa.
+        Uses matplotlib library - https://github.com/matplotlib/matplotlib.
+
+        Parameters:
+        -----------
+        path : str
+            path of root directory
+    """
+    for file in glob.iglob(path + "/**/*.wav", recursive=True):
+        output_filename = file.replace("\\", "-").removesuffix(".wav")
+        path = file.removesuffix("output.wav")
+
+        original_signal, sr = librosa.load(file)
+        normalised_signal = normalisation(original_signal)
+        plus_white_noise = apply_noise("white", normalised_signal)
+        plus_pink_noise = apply_noise("pink", plus_white_noise)
+        plus_brown_noise = apply_noise("brown", plus_pink_noise)
+
+        S = librosa.feature.melspectrogram(y=plus_brown_noise, sr=sr, 
+                                            n_mels=128, fmax=8000)
+        fig, ax = plt.subplots()
+        S_dB = librosa.power_to_db(S, ref=np.max)
+        img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', 
+                                sr=sr, fmax=8000, ax=ax)
+        fig.colorbar(img, ax=ax, format='%+2.0f dB')
+        ax.set_axis_off()
+        plt.gca().collections[-1].colorbar.remove()
+
+        #plt.savefig(path + output_filename + ".png", bbox_inches='0')
+        #print(path + output_filename + ".png")
+        plt.show()
 
 
-normalised_signal = normalisation(original_signal)
+#normalised_signal = normalisation(original_signal)
 
-plus_white_noise = apply_noise("white", normalised_signal)
+#plus_white_noise = apply_noise("white", normalised_signal)
 
-plus_pink_noise = apply_noise("pink", plus_white_noise)
+#plus_pink_noise = apply_noise("pink", plus_white_noise)
 
-plus_brown_noise = apply_noise("brown", plus_pink_noise)
+#plus_brown_noise = apply_noise("brown", plus_pink_noise)
 
-blue_noise = cn.powerlaw_psd_gaussian(-1, original_signal.size)
+#blue_noise = cn.powerlaw_psd_gaussian(-1, original_signal.size)
 
-plot_signals_wave(normalised_signal, blue_noise)
+#plot_signals_wave(normalised_signal, blue_noise)
 
-plot_signals_wave(normalised_signal, plus_brown_noise)
+#plot_signals_wave(normalised_signal, plus_brown_noise)
+
+apply_all_preprocessing("AcousticSignalLabel")
