@@ -20,39 +20,47 @@ def plot_signals(signal_one, signal_two):
 
 def normalisation(signal):
     """Apply normalisation to signal.
-    Uses librosa library
+    Uses librosa library.
 
     Parameters:
     -----------
     signal : np.ndarray
-        The signal to apply normalisation to
+        The signal to apply normalisation to.
 
     Returns:
     --------
     augmented_signal : np.ndarray
-        The signal with normalisation applied
+        The signal with normalisation applied.
     """
     augmented_signal = librosa.util.normalize(signal)
     return augmented_signal
 
-def apply_noise(type, signal):
+def apply_noise(colour, signal):
     """Apply some colours of noise to signal.
-    Uses colorednoise library
+    Uses colorednoise library.
 
     Parameters:
     -----------
-    
+    colour : str
+        Type of noise as string.
+    signal : np.ndarray
+        The signal to apply noise to.
+
+    Returns:
+    --------
+    augmented_signal : np.ndarray
+        The signal with noise applied.
     """
-    if type == "white":
+    if colour == "white":
         exponent = 0
-    elif type == "pink":
+    elif colour == "pink":
         exponent = 1
-    elif type == "brown":
+    elif colour == "brown":
         exponent = 2
-    elif type == "blue":
+    elif colour == "blue":
         -1
     else:
-        raise Exception("noise type not supported")
+        raise Exception("noise colour not supported")
     
     samples = signal.size
     noise_factor = 0.05
