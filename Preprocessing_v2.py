@@ -21,6 +21,7 @@ def plot_signals(signal_one, signal_two):
 def normalisation(signal):
     """Apply normalisation to signal.
     Uses librosa library.
+    https://github.com/librosa/librosa
 
     Parameters:
     -----------
@@ -38,6 +39,7 @@ def normalisation(signal):
 def apply_noise(colour, signal):
     """Apply some colours of noise to signal.
     Uses colorednoise library.
+    https://github.com/felixpatzelt/colorednoise/tree/master
 
     Parameters:
     -----------
