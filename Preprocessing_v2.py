@@ -2,18 +2,29 @@ import librosa
 import matplotlib.pyplot as plt
 import colorednoise as cn
 
-filename = 'RawAudio/output.wav'
+filename = "RawAudio/output.wav"
 original_signal, sr = librosa.load(filename)
 
-def plot_signals(signal_one, signal_two):
+def plot_signals_wave(signal_one, signal_two):
+    """Plot and show two signals as waveforms on top of each other for comparison.
+    Uses librosa library.
+    https://github.com/librosa/librosa
+
+    Parameters:
+    -----------
+    signal_one : np.ndarray
+        First signal to be shown
+    signal_two : np.ndarray
+        Second signal to be shown
+    """
     fig, ax = plt.subplots(nrows=2, sharex=True)
 
     librosa.display.waveshow(signal_one, sr=sr, ax=ax[0], color="blue")
-    ax[0].set(title='Original Audio')
+    ax[0].set(title="Signal One")
     ax[0].label_outer()
 
     librosa.display.waveshow(signal_two, sr=sr, ax=ax[1], color="blue")
-    ax[1].set(title='Augmented Audio')
+    ax[1].set(title="Signal Two")
     ax[1].label_outer()
 
     plt.show()
@@ -82,6 +93,6 @@ plus_brown_noise = apply_noise("brown", plus_pink_noise)
 
 blue_noise = cn.powerlaw_psd_gaussian(-1, original_signal.size)
 
-plot_signals(normalised_signal, blue_noise)
+plot_signals_wave(normalised_signal, blue_noise)
 
-plot_signals(normalised_signal, plus_brown_noise)
+plot_signals_wave(normalised_signal, plus_brown_noise)
