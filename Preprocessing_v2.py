@@ -39,7 +39,7 @@ def normalisation(signal):
 def apply_noise(colour, signal):
     """Apply some colours of noise to signal.
     Uses colorednoise library.
-    https://github.com/felixpatzelt/colorednoise/tree/master
+    https://github.com/felixpatzelt/colorednoise/
 
     Parameters:
     -----------
