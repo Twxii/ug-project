@@ -20,11 +20,11 @@ def plot_signals_wave(signal_one, signal_two):
     """
     fig, ax = plt.subplots(nrows=2, sharex=True)
 
-    librosa.display.waveshow(signal_one, sr=sr, ax=ax[0], color="blue")
+    librosa.display.waveshow(signal_one, ax=ax[0], color="blue")
     ax[0].set(title="Signal One")
     ax[0].label_outer()
 
-    librosa.display.waveshow(signal_two, sr=sr, ax=ax[1], color="blue")
+    librosa.display.waveshow(signal_two, ax=ax[1], color="blue")
     ax[1].set(title="Signal Two")
     ax[1].label_outer()
 
@@ -139,7 +139,7 @@ def apply_all_preprocessing(path):
 
 #plus_violet_noise = apply_noise("violet", plus_blue_noise)
 
-#plot_signals_wave(original_signal, normalised_signal)
+#plot_signals_wave(test_signal, normalised_signal)
 
 #plot_signals_wave(normalised_signal, plus_violet_noise)
 
