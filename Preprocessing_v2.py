@@ -124,8 +124,8 @@ def apply_all_preprocessing(path):
 
 
 ##Test code
-test_file = "RawAudio/output.wav"
-test_signal, sr = librosa.load(test_file)
+#test_file = "RawAudio/output.wav"
+#test_signal, sr = librosa.load(test_file)
 
 #normalised_signal = normalisation(test_signal)
 
