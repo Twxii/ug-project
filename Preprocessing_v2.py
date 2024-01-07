@@ -4,9 +4,6 @@ import colorednoise as cn
 import numpy as np
 import glob
 
-filename = "RawAudio/output.wav"
-original_signal, sr = librosa.load(filename)
-
 def plot_signals_wave(signal_one, signal_two):
     """Plot and show two signals as waveforms on top of each other for 
         comparison.
@@ -127,7 +124,10 @@ def apply_all_preprocessing(path):
 
 
 ##Test code
-#normalised_signal = normalisation(original_signal)
+test_file = "RawAudio/output.wav"
+test_signal, sr = librosa.load(test_file)
+
+#normalised_signal = normalisation(test_signal)
 
 #plus_white_noise = apply_noise("white", normalised_signal)
 
@@ -135,10 +135,12 @@ def apply_all_preprocessing(path):
 
 #plus_brown_noise = apply_noise("brown", plus_pink_noise)
 
-#blue_noise = cn.powerlaw_psd_gaussian(-1, original_signal.size)
+#plus_blue_noise = apply_noise("blue", plus_brown_noise)
+
+#plus_violet_noise = apply_noise("violet", plus_blue_noise)
 
 #plot_signals_wave(original_signal, normalised_signal)
 
-#plot_signals_wave(normalised_signal, plus_brown_noise)
+#plot_signals_wave(normalised_signal, plus_violet_noise)
 
 apply_all_preprocessing("AcousticSignalLabel")
