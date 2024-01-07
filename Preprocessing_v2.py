@@ -75,7 +75,9 @@ def apply_noise(colour, signal):
     elif colour == "brown":
         exponent = 2
     elif colour == "blue":
-        -1
+        exponent = -1
+    elif colour == "violet":
+        exponent = -2
     else:
         raise Exception("noise colour not supported")
     
@@ -124,6 +126,7 @@ def apply_all_preprocessing(path):
         plt.show()
 
 
+##Test code
 #normalised_signal = normalisation(original_signal)
 
 #plus_white_noise = apply_noise("white", normalised_signal)
@@ -134,7 +137,7 @@ def apply_all_preprocessing(path):
 
 #blue_noise = cn.powerlaw_psd_gaussian(-1, original_signal.size)
 
-#plot_signals_wave(normalised_signal, blue_noise)
+#plot_signals_wave(original_signal, normalised_signal)
 
 #plot_signals_wave(normalised_signal, plus_brown_noise)
 
