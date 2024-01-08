@@ -84,13 +84,29 @@ def apply_noise(colour, signal):
     augmented_signal = signal + noise * noise_factor
     return augmented_signal
 
-def plot_mel_spectrogram(signal, samplerate):
-    S = librosa.feature.melspectrogram(y=signal, sr=samplerate, n_mels=128, 
+def plot_mel_spectrogram(signal, sample_rate):
+    '''Plots mel spectrogram from signal given.
+    
+        Uses librosa libray - https://github.com/librosa/librosa.
+        Uses matplotlib library - https://github.com/matplotlib/matplotlib.
+
+        Parameters:
+        -----------
+        signal : np.ndarray
+            Signal to plot spectrogram of.
+        sample_rate : number > 0
+            Samplerate of provided signal.
+
+        Returns:
+        plt : matplotlib plot
+            The plt containing the mel spectrogram.
+    '''
+    S = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=128, 
                                        fmax=8000)
     fig, ax = plt.subplots()
     S_dB = librosa.power_to_db(S, ref=np.max)
     img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', 
-                                   sr=samplerate, fmax=8000, ax=ax)
+                                   sr=sample_rate, fmax=8000, ax=ax)
     fig.colorbar(img, ax=ax, format='%+2.0f dB')
     ax.set_axis_off()
     plt.gca().collections[-1].colorbar.remove()
@@ -109,7 +125,7 @@ def apply_all_preprocessing(path):
         Parameters:
         -----------
         path : str
-            path of root directory
+            path of root directory.
     """
     for file in glob.iglob(path + "/**/*.wav", recursive=True):
         output_filename = file.replace("\\", "-").removesuffix(".wav")
