@@ -136,8 +136,10 @@ def apply_all_preprocessing(path):
         plus_white_noise = apply_noise("white", normalised_signal)
         plus_pink_noise = apply_noise("pink", plus_white_noise)
         plus_brown_noise = apply_noise("brown", plus_pink_noise)
+        plus_blue_noise = apply_noise("blue", plus_brown_noise)
+        plus_violet_noise = apply_noise("violet", plus_blue_noise)
 
-        plt = plot_mel_spectrogram(plus_brown_noise, sr)
+        plt = plot_mel_spectrogram(plus_violet_noise, sr)
         plt.show()
         #plt.savefig(path + output_filename + ".png", bbox_inches='0')
         #print(path + output_filename + ".png")
