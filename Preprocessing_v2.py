@@ -84,6 +84,32 @@ def apply_noise(colour, signal):
     augmented_signal = signal + noise * noise_factor
     return augmented_signal
 
+def windowing(signal, sample_rate, window_length, overlap):
+    '''Splits signal into windows of specified lenth with overlap between windows.
+
+    Parameters:
+    -----------
+    signal : np.ndarray
+        Signal to split into windows.
+    sample_rate : number > 0
+        Samplerate of provided signal.
+    window_length : number > 0
+        Length of window in milliseconds
+    overlap : number > 0
+        Overlap between windows as percentage decimal
+
+    Returns:
+    --------
+    windowed_signal : 2d array
+        2d array of each window of the signal
+    '''
+    window_length_in_samples = int(window_length * sample_rate / 1000)
+    overlap_in_samples = int(window_length_in_samples * overlap)
+    window_length_in_samples_plus_overlap = int(window_length_in_samples + overlap_in_samples * 2)
+    windowed_signal = [signal[i : i + window_length_in_samples_plus_overlap] for i in range(0, signal.size, overlap_in_samples)]
+
+    return windowed_signal
+
 def plot_mel_spectrogram(signal, sample_rate):
     '''Plots mel spectrogram from signal given.
     
@@ -146,10 +172,10 @@ def apply_all_preprocessing(path):
 
 
 ##Test code
-#test_file = "RawAudio/output.wav"
-#test_signal, sr = librosa.load(test_file)
+test_file = "RawAudio/output.wav"
+test_signal, sr = librosa.load(test_file)
 
-#normalised_signal = normalisation(test_signal)
+normalised_signal = normalisation(test_signal)
 
 #plus_white_noise = apply_noise("white", normalised_signal)
 
@@ -165,4 +191,6 @@ def apply_all_preprocessing(path):
 
 #plot_signals_wave(normalised_signal, plus_violet_noise)
 
-apply_all_preprocessing("AcousticSignalLabel")
+#apply_all_preprocessing("AcousticSignalLabel")
+
+windowing(normalised_signal, sr, 400, 0.5)
