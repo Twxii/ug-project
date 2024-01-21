@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import os
 import time
+import shutil
 
 def plot_signals_wave(signal_one, signal_two):
     """Plot and show two signals as waveforms on top of each other for 
@@ -143,7 +144,7 @@ def plot_mel_spectrogram(signal, sample_rate):
     return plt
 
 def apply_all_preprocessing(path):
-    """Apply all preprocessing steps to all .wav files in the specified 
+    '''Apply all preprocessing steps to all .wav files in the specified 
         directory and subdirectories.
         Outputs a mel-frequency-spectrogram into the same directory the audio 
         file was taken from.
@@ -155,7 +156,7 @@ def apply_all_preprocessing(path):
         -----------
         path : str
             path of root directory.
-    """
+    '''
     start_time = time.time()
     for file in glob.iglob(path + "/**/*.wav", recursive=True):
         output_filename = file.replace("\\", "-").removesuffix("output.wav")
@@ -190,6 +191,19 @@ def apply_all_preprocessing(path):
             print(output_filename + colour + " complete at " + str(time.time()-start_time) + " seconds")
 
 
+def delete_augmented_dir(path):
+    '''Deletes all Augmented directories from path, used to clear all files 
+    created by this program.
+
+    Parameters:
+    -----------
+    path : str
+        path of root directory.
+    '''
+    dirs = glob.glob(path + "/**/Augmented", recursive=True)
+    for dir in dirs:
+        shutil.rmtree(dir)
+
 ##Test code
 #test_file = "RawAudio/output.wav"
 #test_signal, sr = librosa.load(test_file)
@@ -200,4 +214,6 @@ def apply_all_preprocessing(path):
         
 #windowing(normalised_signal, sr, 400, 0.5)
 
-apply_all_preprocessing("AcousticSignalLabel\Series1\A")
+#apply_all_preprocessing("AcousticSignalLabel\Series1\A")
+    
+#delete_augmented_dir("AcousticSignalLabel")
