@@ -174,7 +174,7 @@ def apply_all_preprocessing(path):
         count = 0
         for window in windows:
             plt = plot_mel_spectrogram(window, sr)
-            plt.savefig(os.path.join(path, output_filename + "normalised-" + str(count) + ".png"), bbox_inches="tight")
+            plt.savefig(os.path.join(path, output_filename + "normalised-" + str(count) + ".png"), bbox_inches="tight", pad_inches=0)
             plt.close()
             count += 1
         print(output_filename + "normalised complete at " + str(time.time()-start_time) + " seconds")
@@ -185,7 +185,7 @@ def apply_all_preprocessing(path):
             windows = windowing(plus_noise, sr, 400, 0.5)
             for window in windows:
                 plt = plot_mel_spectrogram(window, sr)
-                plt.savefig(os.path.join(path, output_filename + colour + "-" + str(count) + ".png"), bbox_inches="tight")
+                plt.savefig(os.path.join(path, output_filename + colour + "-" + str(count) + ".png"), bbox_inches="tight", pad_inches=0)
                 plt.close()
                 count += 1
             print(output_filename + colour + " complete at " + str(time.time()-start_time) + " seconds")
@@ -203,6 +203,8 @@ def delete_augmented_dir(path):
     dirs = glob.glob(path + "/**/Augmented", recursive=True)
     for dir in dirs:
         shutil.rmtree(dir)
+        print("Removed " + dir)
+    print("Removing complete")
 
 ##Test code
 #test_file = "RawAudio/output.wav"
@@ -214,6 +216,6 @@ def delete_augmented_dir(path):
         
 #windowing(normalised_signal, sr, 400, 0.5)
 
-#apply_all_preprocessing("AcousticSignalLabel\Series1\A")
+apply_all_preprocessing("AcousticSignalLabel\Series1\A\A10")
     
 #delete_augmented_dir("AcousticSignalLabel")
