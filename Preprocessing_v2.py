@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import colorednoise as cn
 import numpy as np
 import glob
+import os
+import time
 
 def plot_signals_wave(signal_one, signal_two):
     """Plot and show two signals as waveforms on top of each other for 
@@ -154,22 +156,38 @@ def apply_all_preprocessing(path):
         path : str
             path of root directory.
     """
+    start_time = time.time()
     for file in glob.iglob(path + "/**/*.wav", recursive=True):
-        output_filename = file.replace("\\", "-").removesuffix(".wav")
+        output_filename = file.replace("\\", "-").removesuffix("output.wav")
         path = file.removesuffix("output.wav")
+        if not os.path.exists(os.path.join(path, "Augmented")):
+            os.mkdir(os.path.join(path, "Augmented"))
+        path = os.path.join(path, "Augmented")
+
+        noise_colours = ["white", "pink", "brown", "blue"]
 
         original_signal, sr = librosa.load(file)
         normalised_signal = normalisation(original_signal)
-        plus_white_noise = apply_noise("white", normalised_signal)
-        plus_pink_noise = apply_noise("pink", plus_white_noise)
-        plus_brown_noise = apply_noise("brown", plus_pink_noise)
-        plus_blue_noise = apply_noise("blue", plus_brown_noise)
-        plus_violet_noise = apply_noise("violet", plus_blue_noise)
+        windows = windowing(normalised_signal, sr, 400, 0.5)
 
-        plt = plot_mel_spectrogram(plus_violet_noise, sr)
-        plt.show()
-        #plt.savefig(path + output_filename + ".png", bbox_inches='0')
-        #print(path + output_filename + ".png")
+        count = 0
+        for window in windows:
+            plt = plot_mel_spectrogram(window, sr)
+            plt.savefig(os.path.join(path, output_filename + "normalised-" + str(count) + ".png"), bbox_inches="tight")
+            plt.close()
+            count += 1
+        print(output_filename + "normalised complete at " + str(time.time()-start_time) + " seconds")
+
+        for colour in noise_colours:
+            count = 0
+            plus_noise = apply_noise(colour, normalised_signal, 0.05)
+            windows = windowing(plus_noise, sr, 400, 0.5)
+            for window in windows:
+                plt = plot_mel_spectrogram(plus_noise, sr)
+                plt.savefig(os.path.join(path, output_filename + colour + "-" + str(count) + ".png"), bbox_inches="tight")
+                plt.close()
+                count += 1
+            print(output_filename + colour + " complete at " + str(time.time()-start_time) + " seconds")
 
 
 ##Test code
@@ -182,5 +200,4 @@ def apply_all_preprocessing(path):
         
 #windowing(normalised_signal, sr, 400, 0.5)
 
-#apply_all_preprocessing("AcousticSignalLabel")
-
+apply_all_preprocessing("AcousticSignalLabel\Series1\A")
