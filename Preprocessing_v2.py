@@ -164,31 +164,34 @@ def apply_all_preprocessing(path):
         if not os.path.exists(os.path.join(path, "Augmented")):
             os.mkdir(os.path.join(path, "Augmented"))
         path = os.path.join(path, "Augmented")
+        
+        if not os.path.exists(os.path.join(path, "complete")):
+            noise_colours = ["white", "pink", "brown", "blue"]
 
-        noise_colours = ["white", "pink", "brown", "blue"]
+            original_signal, sr = librosa.load(file)
+            normalised_signal = normalisation(original_signal)
+            windows = windowing(normalised_signal, sr, 400, 0.5)
 
-        original_signal, sr = librosa.load(file)
-        normalised_signal = normalisation(original_signal)
-        windows = windowing(normalised_signal, sr, 400, 0.5)
-
-        count = 0
-        for window in windows:
-            plt = plot_mel_spectrogram(window, sr)
-            plt.savefig(os.path.join(path, output_filename + "normalised-" + str(count) + ".png"), bbox_inches="tight", pad_inches=0)
-            plt.close()
-            count += 1
-        print(output_filename + "normalised complete at " + str(time.time()-start_time) + " seconds")
-
-        for colour in noise_colours:
             count = 0
-            plus_noise = apply_noise(colour, normalised_signal, 0.05)
-            windows = windowing(plus_noise, sr, 400, 0.5)
             for window in windows:
                 plt = plot_mel_spectrogram(window, sr)
-                plt.savefig(os.path.join(path, output_filename + colour + "-" + str(count) + ".png"), bbox_inches="tight", pad_inches=0)
+                plt.savefig(os.path.join(path, output_filename + "normalised-" + str(count) + ".png"), bbox_inches="tight", pad_inches=0)
                 plt.close()
                 count += 1
-            print(output_filename + colour + " complete at " + str(time.time()-start_time) + " seconds")
+            print(output_filename + "normalised complete at " + str(time.time()-start_time) + " seconds")
+
+            for colour in noise_colours:
+                count = 0
+                plus_noise = apply_noise(colour, normalised_signal, 0.05)
+                windows = windowing(plus_noise, sr, 400, 0.5)
+                for window in windows:
+                    plt = plot_mel_spectrogram(window, sr)
+                    plt.savefig(os.path.join(path, output_filename + colour + "-" + str(count) + ".png"), bbox_inches="tight", pad_inches=0)
+                    plt.close()
+                    count += 1
+                print(output_filename + colour + " complete at " + str(time.time()-start_time) + " seconds")
+            file_complete_flag = open(os.path.join(path, "complete"), "x")
+            file_complete_flag.close()
 
 
 def delete_augmented_dir(path):
@@ -216,6 +219,6 @@ def delete_augmented_dir(path):
         
 #windowing(normalised_signal, sr, 400, 0.5)
 
-apply_all_preprocessing("AcousticSignalLabel\Series1\A\A10")
+apply_all_preprocessing("AcousticSignalLabel")
     
 #delete_augmented_dir("AcousticSignalLabel")
