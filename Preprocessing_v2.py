@@ -183,7 +183,7 @@ def apply_all_preprocessing(path):
             plus_noise = apply_noise(colour, normalised_signal, 0.05)
             windows = windowing(plus_noise, sr, 400, 0.5)
             for window in windows:
-                plt = plot_mel_spectrogram(plus_noise, sr)
+                plt = plot_mel_spectrogram(window, sr)
                 plt.savefig(os.path.join(path, output_filename + colour + "-" + str(count) + ".png"), bbox_inches="tight")
                 plt.close()
                 count += 1
