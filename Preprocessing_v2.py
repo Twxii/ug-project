@@ -48,7 +48,7 @@ def normalisation(signal):
     augmented_signal = librosa.util.normalize(signal)
     return augmented_signal
 
-def apply_noise(colour, signal):
+def apply_noise(colour, signal, noise_factor):
     """Apply some colours of noise to signal.
 
     Uses colorednoise library - https://github.com/felixpatzelt/colorednoise.
@@ -59,6 +59,8 @@ def apply_noise(colour, signal):
         Type of noise as string.
     signal : np.ndarray
         The signal to apply noise to.
+    noise_factor : int
+        Amount of noise to be applied to signal.
 
     Returns:
     --------
@@ -79,7 +81,6 @@ def apply_noise(colour, signal):
         raise Exception("noise colour not supported")
     
     samples = signal.size
-    noise_factor = 0.05
     noise = cn.powerlaw_psd_gaussian(exponent, samples)
     augmented_signal = signal + noise * noise_factor
     return augmented_signal
@@ -91,11 +92,11 @@ def windowing(signal, sample_rate, window_length, overlap):
     -----------
     signal : np.ndarray
         Signal to split into windows.
-    sample_rate : number > 0
+    sample_rate : int > 0
         Samplerate of provided signal.
-    window_length : number > 0
+    window_length : int > 0
         Length of window in milliseconds
-    overlap : number > 0
+    overlap : int > 0
         Overlap between windows as percentage decimal
 
     Returns:
@@ -120,7 +121,7 @@ def plot_mel_spectrogram(signal, sample_rate):
         -----------
         signal : np.ndarray
             Signal to plot spectrogram of.
-        sample_rate : number > 0
+        sample_rate : int > 0
             Samplerate of provided signal.
 
         Returns:
@@ -172,25 +173,14 @@ def apply_all_preprocessing(path):
 
 
 ##Test code
-test_file = "RawAudio/output.wav"
-test_signal, sr = librosa.load(test_file)
+#test_file = "RawAudio/output.wav"
+#test_signal, sr = librosa.load(test_file)
 
-normalised_signal = normalisation(test_signal)
-
-#plus_white_noise = apply_noise("white", normalised_signal)
-
-#plus_pink_noise = apply_noise("pink", plus_white_noise)
-
-#plus_brown_noise = apply_noise("brown", plus_pink_noise)
-
-#plus_blue_noise = apply_noise("blue", plus_brown_noise)
-
-#plus_violet_noise = apply_noise("violet", plus_blue_noise)
-
-#plot_signals_wave(test_signal, normalised_signal)
+#normalised_signal = normalisation(test_signal)
 
 #plot_signals_wave(normalised_signal, plus_violet_noise)
+        
+#windowing(normalised_signal, sr, 400, 0.5)
 
 #apply_all_preprocessing("AcousticSignalLabel")
 
-windowing(normalised_signal, sr, 400, 0.5)
