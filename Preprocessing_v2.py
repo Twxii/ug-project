@@ -6,6 +6,7 @@ import glob
 import os
 import time
 import shutil
+from multiprocessing import Pool
 
 def plot_signals_wave(signal_one, signal_two):
     """Plot and show two signals as waveforms on top of each other for 
@@ -137,8 +138,6 @@ def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
         ax : matplotlib axis
             The axis containing the mel spectrogram.
     '''
-    start_time = time.time()
-
     if fig is None or ax is None:
         fig, ax = plt.subplots()
 
@@ -153,70 +152,70 @@ def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
         ax.set_axis_off()
         plt.gca().collections[-1].colorbar.remove()
 
-    print(f"spectrogram complete in {time.time() - start_time} seconds")
-
     return ax
 
-def apply_all_preprocessing(path):
-    '''Apply all preprocessing steps to all .wav files in the specified 
-        directory and subdirectories.
-        Outputs a mel-frequency-spectrogram into the same directory the audio 
-        file was taken from.
+def process_file(file):
+    '''Apply all preprocessing steps to file proviede.
+        Outputs a mel-frequency-spectrogram into the same a new "Augmented" 
+        directory from the location the audio file was taken from.
 
         Uses librosa library - https://github.com/librosa/librosa.
         Uses matplotlib library - https://github.com/matplotlib/matplotlib.
 
         Parameters:
         -----------
-        path : str
-            path of root directory.
+        file : iterator
+            file to be processed.
     '''
     start_time = time.time()
 
-    for file in glob.iglob(path + "/**/*.wav", recursive=True):
-        output_filename = os.path.dirname(file).replace("\\", "-").removesuffix("output.wav")
-        output_path = os.path.join(os.path.dirname(file), "Augmented")
+    output_filename = os.path.dirname(file).replace("\\", "-").removesuffix("output.wav")
+    output_path = os.path.join(os.path.dirname(file), "Augmented")
 
-        if not os.path.exists(output_path):
-            os.mkdir(output_path)
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
-        complete_flag_path = os.path.join(output_path, "complete")
+    complete_flag_path = os.path.join(output_path, "complete")
+    
+    if not os.path.exists(complete_flag_path):
+        noise_colours = ["white", "pink", "brown", "blue"]
+
+        original_signal, sr = librosa.load(file)
+        normalised_signal = normalisation(original_signal)
+        windows = windowing(normalised_signal, sr, 400, 0.5)
+
+        plt.figure()
+
+        for count, window in enumerate(windows):
+            plt.clf() # Clear figure
+            plot_mel_spectrogram(window, sr)
+            plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
+            plt.close()
         
-        if not os.path.exists(complete_flag_path):
-            noise_colours = ["white", "pink", "brown", "blue"]
+        #print(f"{output_filename}-normalised complete at {time.time() - start_time} seconds")
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        print(f"{output_filename}-normalised complete at {current_time}")
 
-            original_signal, sr = librosa.load(file)
-            normalised_signal = normalisation(original_signal)
-            windows = windowing(normalised_signal, sr, 400, 0.5)
-
-            plt.figure()
+        for colour in noise_colours:
+            plus_noise = apply_noise(colour, normalised_signal, 0.05)
+            windows = windowing(plus_noise, sr, 400, 0.5)
 
             for count, window in enumerate(windows):
-                plt.clf() # Clear figure
+                plt.clf() # Clear the figure
                 plot_mel_spectrogram(window, sr)
-                save_time = time.time()
-                plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
+                plt.savefig(os.path.join(output_path, f"{output_filename}-{colour}-{count}.png"), bbox_inches="tight", pad_inches=0)
                 plt.close()
-                print(f"saving one spectrogram complete in {time.time() - save_time} seconds")
             
-            print(f"{output_filename}-normalised complete at {time.time() - start_time} seconds")
+            #print(f"{output_filename}-{colour} complete at {time.time() - start_time} seconds")
+            current_time = time.strftime("%H:%M:%S", time.localtime())
+            print(f"{output_filename}-{colour} complete at {current_time}")
 
-            for colour in noise_colours:
-                plus_noise = apply_noise(colour, normalised_signal, 0.05)
-                windows = windowing(plus_noise, sr, 400, 0.5)
+        print()
+        open(complete_flag_path, "x").close()
 
-                for count, window in enumerate(windows):
-                    plt.clf() # Clear the figure
-                    plot_mel_spectrogram(window, sr)
-                    save_time = time.time()
-                    plt.savefig(os.path.join(output_path, f"{output_filename}-{colour}-{count}.png"), bbox_inches="tight", pad_inches=0)
-                    plt.close()
-                    print(f"saving one spectrogram complete in {time.time() - save_time} seconds")
-                
-                print(f"{output_filename}-{colour} complete at {time.time() - start_time} seconds")
-
-            print()
-            open(complete_flag_path, "x").close()
+def apply_all_preprocessing(path, pool_size):
+    with Pool(pool_size) as pool:
+        pool.map(process_file, glob.iglob(os.path.join(path, "**/*.wav"), recursive=True))
 
 def delete_augmented_dir(path):
     '''Deletes all Augmented directories from path, used to clear all files 
@@ -234,15 +233,22 @@ def delete_augmented_dir(path):
     print("Removing complete")
 
 ##Test code
-#test_file = "RawAudio/output.wav"
-#test_signal, sr = librosa.load(test_file)
+if __name__ == "__main__":
+    start_time = time.strftime("%H:%M:%S", time.localtime())
+    print(f"Start time: {start_time}")
+    #test_file = "RawAudio/output.wav"
+    #test_signal, sr = librosa.load(test_file)
 
-#normalised_signal = normalisation(test_signal)
+    #normalised_signal = normalisation(test_signal)
 
-#plot_signals_wave(normalised_signal, plus_violet_noise)
+    #plot_signals_wave(normalised_signal, plus_violet_noise)
         
-#windowing(normalised_signal, sr, 400, 0.5)
-    
-delete_augmented_dir("AcousticSignalLabel")
+    #windowing(normalised_signal, sr, 400, 0.5)
 
-#apply_all_preprocessing("AcousticSignalLabel")
+    #delete_augmented_dir("AcousticSignalLabel")
+
+    apply_all_preprocessing("AcousticSignalLabel", 10)
+
+    current_time = time.strftime("%H:%M:%S", time.localtime())
+    print(f"Start time was: {start_time}")
+    print(f"Complete at: {current_time}")
