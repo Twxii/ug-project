@@ -49,6 +49,7 @@ def normalisation(signal):
         The signal with normalisation applied.
     """
     augmented_signal = librosa.util.normalize(signal)
+
     return augmented_signal
 
 def apply_noise(colour, signal, noise_factor):
@@ -86,6 +87,7 @@ def apply_noise(colour, signal, noise_factor):
     samples = signal.size
     noise = cn.powerlaw_psd_gaussian(exponent, samples)
     augmented_signal = signal + noise * noise_factor
+
     return augmented_signal
 
 def windowing(signal, sample_rate, window_length, overlap):
@@ -114,7 +116,7 @@ def windowing(signal, sample_rate, window_length, overlap):
 
     return windowed_signal
 
-def plot_mel_spectrogram(signal, sample_rate):
+def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
     '''Plots mel spectrogram from signal given.
     
         Uses librosa libray - https://github.com/librosa/librosa.
@@ -126,22 +128,34 @@ def plot_mel_spectrogram(signal, sample_rate):
             Signal to plot spectrogram of.
         sample_rate : int > 0
             Samplerate of provided signal.
+        fig : matplotlib figure, optional
+            The figure to use for plotting.
+        ax : matplotlib axis, optional
+            The axis to use for plotting.
 
         Returns:
-        plt : matplotlib plot
-            The plt containing the mel spectrogram.
+        ax : matplotlib axis
+            The axis containing the mel spectrogram.
     '''
-    S = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=128, 
-                                       fmax=8000)
-    fig, ax = plt.subplots()
+    start_time = time.time()
+
+    if fig is None or ax is None:
+        fig, ax = plt.subplots()
+
+    S = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=128, fmax=8000)
     S_dB = librosa.power_to_db(S, ref=np.max)
-    img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', 
-                                   sr=sample_rate, fmax=8000, ax=ax)
-    fig.colorbar(img, ax=ax, format='%+2.0f dB')
-    ax.set_axis_off()
-    plt.gca().collections[-1].colorbar.remove()
+    img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sample_rate, fmax=8000, ax=ax)
     
-    return plt
+    if ax.get_images():
+        ax.get_images()[0].set_array(S_dB)
+    else:
+        fig.colorbar(img, ax=ax, format='%+2.0f dB')
+        ax.set_axis_off()
+        plt.gca().collections[-1].colorbar.remove()
+
+    print(f"spectrogram complete in {time.time() - start_time} seconds")
+
+    return ax
 
 def apply_all_preprocessing(path):
     '''Apply all preprocessing steps to all .wav files in the specified 
@@ -180,8 +194,10 @@ def apply_all_preprocessing(path):
             for count, window in enumerate(windows):
                 plt.clf() # Clear figure
                 plot_mel_spectrogram(window, sr)
+                save_time = time.time()
                 plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
                 plt.close()
+                print(f"saving one spectrogram complete in {time.time() - save_time} seconds")
             
             print(f"{output_filename}-normalised complete at {time.time() - start_time} seconds")
 
@@ -192,8 +208,10 @@ def apply_all_preprocessing(path):
                 for count, window in enumerate(windows):
                     plt.clf() # Clear the figure
                     plot_mel_spectrogram(window, sr)
+                    save_time = time.time()
                     plt.savefig(os.path.join(output_path, f"{output_filename}-{colour}-{count}.png"), bbox_inches="tight", pad_inches=0)
                     plt.close()
+                    print(f"saving one spectrogram complete in {time.time() - save_time} seconds")
                 
                 print(f"{output_filename}-{colour} complete at {time.time() - start_time} seconds")
 
@@ -225,6 +243,6 @@ def delete_augmented_dir(path):
         
 #windowing(normalised_signal, sr, 400, 0.5)
     
-#delete_augmented_dir("AcousticSignalLabel")
+delete_augmented_dir("AcousticSignalLabel")
 
-apply_all_preprocessing("AcousticSignalLabel")
+#apply_all_preprocessing("AcousticSignalLabel")
