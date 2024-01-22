@@ -155,7 +155,7 @@ def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
     return ax
 
 def process_file(file):
-    '''Apply all preprocessing steps to file proviede.
+    '''Apply all preprocessing steps to file provided.
         Outputs a mel-frequency-spectrogram into the same a new "Augmented" 
         directory from the location the audio file was taken from.
 
@@ -214,6 +214,16 @@ def process_file(file):
         open(complete_flag_path, "x").close()
 
 def apply_all_preprocessing(path, pool_size):
+    '''Applies all preprocessing steps to all .wav files in the given path. Uses
+        multiprocessing for faster completion.
+
+        Parameters:
+        -----------
+        path : str
+            Path of parent directory to be processed.
+        pool_size : int
+            Number of "cpu cores" to use.
+    '''
     with Pool(pool_size) as pool:
         pool.map(process_file, glob.iglob(os.path.join(path, "**/*.wav"), recursive=True))
 
