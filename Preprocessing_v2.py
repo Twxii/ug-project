@@ -8,6 +8,7 @@ import time
 import shutil
 from multiprocessing import Pool
 import re
+import random
 
 def plot_signals_wave(signal_one, signal_two):
     """Plot and show two signals as waveforms on top of each other for 
@@ -54,7 +55,7 @@ def normalisation(signal):
 
     return augmented_signal
 
-def apply_noise(colour, signal, noise_factor):
+def apply_noise(colour, signal, noise_factor, noise_variation):
     """Apply some colours of noise to signal.
 
     Uses colorednoise library - https://github.com/felixpatzelt/colorednoise.
@@ -88,6 +89,8 @@ def apply_noise(colour, signal, noise_factor):
     
     samples = signal.size
     noise = cn.powerlaw_psd_gaussian(exponent, samples)
+    noise_factor = noise_factor + random.uniform(-noise_variation, noise_variation)
+    print(noise_factor)
     augmented_signal = signal + noise * noise_factor
 
     return augmented_signal
@@ -206,19 +209,16 @@ def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
         ax : matplotlib axis
             The axis containing the mel spectrogram.
     '''
-    if fig is None or ax is None:
-        fig, ax = plt.subplots()
+    #385 x 128
+    fig, ax = plt.subplots()
 
     S = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=128, fmax=8000)
     S_dB = librosa.power_to_db(S, ref=np.max)
     img = librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sample_rate, fmax=8000, ax=ax)
     
-    if ax.get_images():
-        ax.get_images()[0].set_array(S_dB)
-    else:
-        fig.colorbar(img, ax=ax, format='%+2.0f dB')
-        ax.set_axis_off()
-        plt.gca().collections[-1].colorbar.remove()
+    fig.colorbar(img, ax=ax, format='%+2.0f dB')
+    ax.set_axis_off()
+    plt.gca().collections[-1].colorbar.remove()
 
     return ax
 
@@ -248,7 +248,7 @@ def process_file(file):
     if not os.path.exists(complete_flag_path):
         noise_colours = ["white", "pink", "brown", "blue"]
 
-        original_signal, sr = librosa.load(file)
+        original_signal, sr = librosa.load(file, sr=44100)
         normalised_signal = normalisation(original_signal)
         windows = windowing(normalised_signal, sr, 400, 0.5)
 
@@ -265,7 +265,7 @@ def process_file(file):
         print(f"{output_filename}-normalised complete at {current_time}")
 
         for colour in noise_colours:
-            plus_noise = apply_noise(colour, normalised_signal, 0.05)
+            plus_noise = apply_noise(colour, normalised_signal, 0.05, 0.01)
             windows = windowing(plus_noise, sr, 400, 0.5)
 
             for count, window in enumerate(windows):
@@ -315,7 +315,9 @@ if __name__ == "__main__":
     start_time = time.strftime("%H:%M:%S", time.localtime())
     print(f"Start time: {start_time}")
     #test_file = "RawAudio/output.wav"
-    #test_signal, sr = librosa.load(test_file)
+    #test_signal, sr = librosa.load(test_file, sr=44100)
+
+    #plot_mel_spectrogram(test_signal, sr)
 
     #normalised_signal = normalisation(test_signal)
 
@@ -325,7 +327,7 @@ if __name__ == "__main__":
 
     #delete_augmented_dir("AcousticSignalLabel")
 
-    #apply_all_preprocessing("AcousticSignalLabel", 10)
+    apply_all_preprocessing("AcousticSignalLabel", 10)
 
     current_time = time.strftime("%H:%M:%S", time.localtime())
     print(f"Start time was: {start_time}")
