@@ -7,6 +7,7 @@ import os
 import time
 import shutil
 from multiprocessing import Pool
+import re
 
 def plot_signals_wave(signal_one, signal_two):
     """Plot and show two signals as waveforms on top of each other for 
@@ -116,6 +117,69 @@ def windowing(signal, sample_rate, window_length, overlap):
     windowed_signal = [signal[i : i + window_length_in_samples_plus_overlap] for i in range(0, signal.size, overlap_in_samples)]
 
     return windowed_signal
+
+def window_labels(file, window_length, overlap):
+    output_filename = os.path.dirname(file).replace("\\", "-")
+    output_path = os.path.join(os.path.dirname(file), "Augmented")
+    #plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
+    
+    return 0
+
+def count_classes(file):
+    '''Counts activity classes in the given file.
+
+    Parameters:
+    -----------
+    file : str
+        path of file.
+
+    Returns:
+    --------
+    labels : 2d list
+        2d list in the format [["activity0", count], ["activity1", count], ...]
+    '''
+    #output_filename = os.path.dirname(file).replace("\\", "-")
+    #output_path = os.path.join(os.path.dirname(file))
+
+    pattern = r"[0-9]."
+    labels = []
+    input_label_file = open(os.path.join(file))
+    for line in input_label_file:
+        label = re.sub(pattern, "", line).lstrip().rstrip("\n")
+        if not any(label in sublist for sublist in labels):
+            labels.append([label, 1])
+        else:
+            for x in labels:
+                if x[0] == label:
+                    x[1] += 1
+    #print(labels)
+    #print(os.path.join(output_path, f"{output_filename}-label-count.txt"))
+    return labels
+
+def join_label_lists(listOne, listTwo):
+    '''Takes two of the label lists and adds listTwo to listOne.
+
+    Parameters:
+    -----------
+    listOne : list
+        2d label list
+    listTwo : list
+        2d label list
+
+    Returns:
+    --------
+    listOne : list#
+        2d label list
+    '''
+    for x in listTwo:
+        if not any(x[0] in sublist for sublist in listOne):
+            listOne.append([x[0], x[1]])
+        else:
+            for y in listOne:
+                if y[0] == x[0]:
+                    y[1] = y[1] + x[1]
+
+    return listOne
 
 def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
     '''Plots mel spectrogram from signal given.
@@ -257,7 +321,13 @@ if __name__ == "__main__":
 
     #delete_augmented_dir("AcousticSignalLabel")
 
-    apply_all_preprocessing("AcousticSignalLabel", 10)
+    #apply_all_preprocessing("AcousticSignalLabel", 10)
+
+    listOne = count_classes("AcousticSignalLabel\\Series1\\A\\A10\\Labels_A10.txt")
+    listTwo = count_classes("AcousticSignalLabel\\Series1\\A\\A11\\Labels_A11.txt")
+    joinedList = join_label_lists(listOne, listTwo)
+
+    print(joinedList)
 
     current_time = time.strftime("%H:%M:%S", time.localtime())
     print(f"Start time was: {start_time}")
