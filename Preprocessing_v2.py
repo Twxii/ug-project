@@ -68,6 +68,8 @@ def apply_noise(colour, signal, noise_factor, noise_variation):
         The signal to apply noise to.
     noise_factor : int
         Amount of noise to be applied to signal.
+    noise_variation : float > 0
+        Amount of variation to add to noise_factor. e.g., +- 0.01
 
     Returns:
     --------
