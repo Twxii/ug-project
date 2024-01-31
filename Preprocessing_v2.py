@@ -113,8 +113,15 @@ def windowing(signal, sample_rate, window_length, overlap):
     '''
     window_length_in_samples = int(window_length * sample_rate / 1000)
     overlap_in_samples = int(window_length_in_samples * overlap)
-    window_length_in_samples_plus_overlap = int(window_length_in_samples + overlap_in_samples * 2)
-    windowed_signal = [signal[i : i + window_length_in_samples_plus_overlap] for i in range(0, signal.size, overlap_in_samples)]
+    windowed_signal = [signal[i : i + window_length_in_samples] for i in range(0, signal.size, overlap_in_samples)]
+    
+    x = False
+    while x == False:
+        i = len(windowed_signal) - 1
+        if len(windowed_signal[i]) < window_length_in_samples:
+            windowed_signal.pop(i)
+        else:
+            x = True
 
     return windowed_signal
 
@@ -138,9 +145,6 @@ def count_classes(file):
     labels : 2d list
         2d list in the format [["activity0", count], ["activity1", count], ...]
     '''
-    #output_filename = os.path.dirname(file).replace("\\", "-")
-    #output_path = os.path.join(os.path.dirname(file))
-
     pattern = r"[0-9]."
     labels = []
     input_label_file = open(os.path.join(file))
@@ -322,12 +326,6 @@ if __name__ == "__main__":
     #delete_augmented_dir("AcousticSignalLabel")
 
     #apply_all_preprocessing("AcousticSignalLabel", 10)
-
-    listOne = count_classes("AcousticSignalLabel\\Series1\\A\\A10\\Labels_A10.txt")
-    listTwo = count_classes("AcousticSignalLabel\\Series1\\A\\A11\\Labels_A11.txt")
-    joinedList = join_label_lists(listOne, listTwo)
-
-    print(joinedList)
 
     current_time = time.strftime("%H:%M:%S", time.localtime())
     print(f"Start time was: {start_time}")
