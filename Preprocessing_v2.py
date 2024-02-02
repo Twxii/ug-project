@@ -92,7 +92,6 @@ def apply_noise(colour, signal, noise_factor, noise_variation):
     samples = signal.size
     noise = cn.powerlaw_psd_gaussian(exponent, samples)
     noise_factor = noise_factor + random.uniform(-noise_variation, noise_variation)
-    print(noise_factor)
     augmented_signal = signal + noise * noise_factor
 
     return augmented_signal
@@ -154,7 +153,7 @@ def count_classes(file):
     labels = []
     input_label_file = open(os.path.join(file))
     for line in input_label_file:
-        label = re.sub(pattern, "", line).lstrip().rstrip("\n")
+        label = re.sub(pattern, "", line).lstrip().rstrip("\n ").replace(".\t", "")
         if not any(label in sublist for sublist in labels):
             labels.append([label, 1])
         else:
@@ -279,8 +278,7 @@ def process_file(file):
             #print(f"{output_filename}-{colour} complete at {time.time() - start_time} seconds")
             current_time = time.strftime("%H:%M:%S", time.localtime())
             print(f"{output_filename}-{colour} complete at {current_time}")
-
-        print()
+        
         open(complete_flag_path, "x").close()
 
 def apply_all_preprocessing(path, pool_size):
@@ -312,6 +310,14 @@ def delete_augmented_dir(path):
         print("Removed " + dir)
     print("Removing complete")
 
+def count_all_classes(path):
+    '''
+    '''
+    label_list = []
+    for file in glob.iglob(os.path.join(path, "**/*.txt"), recursive=True):
+        label_list = join_label_lists(label_list, count_classes(file))
+    print(label_list)
+
 ##Test code
 if __name__ == "__main__":
     start_time = time.strftime("%H:%M:%S", time.localtime())
@@ -329,7 +335,9 @@ if __name__ == "__main__":
 
     #delete_augmented_dir("AcousticSignalLabel")
 
-    apply_all_preprocessing("AcousticSignalLabel", 10)
+    #apply_all_preprocessing("AcousticSignalLabel", 10)
+
+    count_all_classes("AcousticSignalLabel")
 
     current_time = time.strftime("%H:%M:%S", time.localtime())
     print(f"Start time was: {start_time}")
