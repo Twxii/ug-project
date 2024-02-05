@@ -132,8 +132,28 @@ def windowing(signal, sample_rate, window_length, overlap):
 def window_labels(file, window_length, overlap):
     output_filename = os.path.dirname(file).replace("\\", "-")
     output_path = os.path.join(os.path.dirname(file), "Augmented")
+
+    window_length_in_seconds = window_length / 1000
+    overlap_in_seconds = window_length_in_seconds * overlap
+    
+    windowed_labels = []
+
+    input_label_file = open(os.path.join(file))
+    for line in input_label_file:
+        activity = re.sub(r"[0-9].", "", line).lstrip().rstrip("\n ").replace(".\t", "")
+        activity_times = re.sub(r"[A-Za-z]", "", line).rstrip()
+        activity_start_time = activity_times[:8]
+        activity_end_time = activity_times[-8:]
+        print(activity)
+        print(activity_times)
+        print(activity_start_time)
+        print(activity_end_time)
+        print()
+
+
     #plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
     
+
     return 0
 
 def count_classes(file):
@@ -149,11 +169,10 @@ def count_classes(file):
     labels : 2d list
         2d list in the format [["activity0", count], ["activity1", count], ...]
     '''
-    pattern = r"[0-9]."
     labels = []
     input_label_file = open(os.path.join(file))
     for line in input_label_file:
-        label = re.sub(pattern, "", line).lstrip().rstrip("\n ").replace(".\t", "")
+        label = re.sub(r"[0-9].", "", line).lstrip().rstrip("\n ").replace(".\t", "")
         if not any(label in sublist for sublist in labels):
             labels.append([label, 1])
         else:
@@ -176,7 +195,7 @@ def join_label_lists(listOne, listTwo):
 
     Returns:
     --------
-    listOne : list#
+    listOne : list
         2d label list
     '''
     for x in listTwo:
@@ -335,9 +354,11 @@ if __name__ == "__main__":
 
     #delete_augmented_dir("AcousticSignalLabel")
 
-    #apply_all_preprocessing("AcousticSignalLabel", 10)
+    #apply_all_preprocessing("AcousticSignalLabel\Series1", 8)
 
-    count_all_classes("AcousticSignalLabel")
+    #count_all_classes("AcousticSignalLabel")
+
+    window_labels("AcousticSignalLabel\Series1\A\A10\Labels_A10.txt", 400, 0.5)
 
     current_time = time.strftime("%H:%M:%S", time.localtime())
     print(f"Start time was: {start_time}")
