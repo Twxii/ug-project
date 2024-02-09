@@ -143,7 +143,6 @@ def window_labels(file, window_length, overlap):
         activity_times = re.sub(r"[A-Za-z]", "", line).rstrip()
         activity_start_time = float(activity_times[:8])
         activity_end_time = float(activity_times[-8:])
-
         activities.append([activity, activity_start_time, activity_end_time])
 
     file_length = float(activities[-1][2])
@@ -152,9 +151,7 @@ def window_labels(file, window_length, overlap):
 
     while current_time + window_length_seconds <= file_length:
         interval_end = round(current_time + window_length / 1000, 2)
-
         windowed_labels.append(["", current_time, interval_end])
-
         current_time = round(current_time + window_length_seconds - (window_length_seconds * overlap), 2)
 
     for window in windowed_labels:
@@ -164,11 +161,22 @@ def window_labels(file, window_length, overlap):
             elif window[1] < activity[2] and window[2] > activity[1] and window[0] != activity[0]:
                 window[0] = [window[0], activity[0]]     
 
-    #print(windowed_labels)
-    
-    #print(os.path.join(output_path, f"{output_filename}_{count}_labels.txt"))
+    count = 0
+    for window in windowed_labels:
+        if isinstance(window[0], list):
+            activity_num = len(window[0])
+            activities = window[0][0]
+            for x in range(1,activity_num):
+                activities = f"{activities}, {window[0][x]}"
+            output = f"{window[1]}\t{window[2]}\t{activities}"
+        else:
+            output = f"{window[1]}\t{window[2]}\t{window[0]}"
 
-    return 0
+        f = open(os.path.join(output_path, f"{output_filename}_{count}_labels.txt"), "w")
+        f.write(output)
+        f.close()
+
+        count += 1
 
 def count_classes(file):
     '''Counts activity classes in the given file.
