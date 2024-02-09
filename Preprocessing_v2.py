@@ -132,25 +132,41 @@ def windowing(signal, sample_rate, window_length, overlap):
 def window_labels(file, window_length, overlap):
     output_filename = os.path.dirname(file).replace("\\", "-")
     output_path = os.path.join(os.path.dirname(file), "Augmented")
-
-    window_length_in_seconds = window_length / 1000
-    overlap_in_seconds = window_length_in_seconds * overlap
+    window_length_seconds = window_length / 1000
     
     windowed_labels = []
+    activities = []
 
     input_label_file = open(os.path.join(file))
     for line in input_label_file:
         activity = re.sub(r"[0-9].", "", line).lstrip().rstrip("\n ").replace(".\t", "")
         activity_times = re.sub(r"[A-Za-z]", "", line).rstrip()
-        activity_start_time = activity_times[:8]
-        activity_end_time = activity_times[-8:]
-        print(activity)
-        print(activity_times)
-        print(activity_start_time)
-        print(activity_end_time)
-        print()
+        activity_start_time = float(activity_times[:8])
+        activity_end_time = float(activity_times[-8:])
 
+        activities.append([activity, activity_start_time, activity_end_time])
 
+    file_length = float(activities[-1][2])
+
+    current_time = 0
+
+    while current_time + window_length_seconds <= file_length:
+        interval_end = round(current_time + window_length / 1000, 2)
+
+        windowed_labels.append(["", current_time, interval_end])
+
+        current_time = round(current_time + window_length_seconds - (window_length_seconds * overlap), 2)
+
+    for window in windowed_labels:
+        for activity in activities:
+            if window[1] < activity[2] and window[0] == "":
+                window[0] = activity[0]
+            elif window[1] < activity[2] and window[2] > activity[1] and window[0] != activity[0]:
+                window[0] = [window[0], activity[0]]     
+
+    print(windowed_labels)
+    
+        
     #plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
     
 
@@ -174,7 +190,7 @@ def count_classes(file):
     for line in input_label_file:
         label = re.sub(r"[0-9].", "", line).lstrip().rstrip("\n ").replace(".\t", "")
         if not any(label in sublist for sublist in labels):
-            labels.append([label, 1])
+            labels.append(([label, 1]))
         else:
             for x in labels:
                 if x[0] == label:
