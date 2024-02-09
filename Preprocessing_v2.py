@@ -130,7 +130,7 @@ def windowing(signal, sample_rate, window_length, overlap):
     return windowed_signal
 
 def window_labels(file, window_length, overlap):
-    output_filename = os.path.dirname(file).replace("\\", "-")
+    output_filename = os.path.dirname(file).replace("\\", "_")
     output_path = os.path.join(os.path.dirname(file), "Augmented")
     window_length_seconds = window_length / 1000
     
@@ -164,11 +164,9 @@ def window_labels(file, window_length, overlap):
             elif window[1] < activity[2] and window[2] > activity[1] and window[0] != activity[0]:
                 window[0] = [window[0], activity[0]]     
 
-    print(windowed_labels)
+    #print(windowed_labels)
     
-        
-    #plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
-    
+    #print(os.path.join(output_path, f"{output_filename}_{count}_labels.txt"))
 
     return 0
 
@@ -196,7 +194,7 @@ def count_classes(file):
                 if x[0] == label:
                     x[1] += 1
     #print(labels)
-    #print(os.path.join(output_path, f"{output_filename}-label-count.txt"))
+    #print(os.path.join(output_path, f"{output_filename}_label_count.txt"))
     return labels
 
 def join_label_lists(listOne, listTwo):
@@ -273,7 +271,7 @@ def process_file(file):
     '''
     start_time = time.time()
 
-    output_filename = os.path.dirname(file).replace("\\", "-").removesuffix("output.wav")
+    output_filename = os.path.dirname(file).replace("\\", "_").removesuffix("output.wav")
     output_path = os.path.join(os.path.dirname(file), "Augmented")
 
     if not os.path.exists(output_path):
@@ -293,12 +291,12 @@ def process_file(file):
         for count, window in enumerate(windows):
             plt.clf() # Clear figure
             plot_mel_spectrogram(window, sr)
-            plt.savefig(os.path.join(output_path, f"{output_filename}-normalised-{count}.png"), bbox_inches="tight", pad_inches=0)
+            plt.savefig(os.path.join(output_path, f"{output_filename}_normalised_{count}.png"), bbox_inches="tight", pad_inches=0)
             plt.close()
         
-        #print(f"{output_filename}-normalised complete at {time.time() - start_time} seconds")
+        #print(f"{output_filename}_normalised complete at {time.time() - start_time} seconds")
         current_time = time.strftime("%H:%M:%S", time.localtime())
-        print(f"{output_filename}-normalised complete at {current_time}")
+        print(f"{output_filename}_normalised complete at {current_time}")
 
         for colour in noise_colours:
             plus_noise = apply_noise(colour, normalised_signal, 0.05, 0.01)
@@ -307,12 +305,12 @@ def process_file(file):
             for count, window in enumerate(windows):
                 plt.clf() # Clear the figure
                 plot_mel_spectrogram(window, sr)
-                plt.savefig(os.path.join(output_path, f"{output_filename}-{colour}-{count}.png"), bbox_inches="tight", pad_inches=0)
+                plt.savefig(os.path.join(output_path, f"{output_filename}_{colour}_{count}.png"), bbox_inches="tight", pad_inches=0)
                 plt.close()
             
-            #print(f"{output_filename}-{colour} complete at {time.time() - start_time} seconds")
+            #print(f"{output_filename}_{colour} complete at {time.time() - start_time} seconds")
             current_time = time.strftime("%H:%M:%S", time.localtime())
-            print(f"{output_filename}-{colour} complete at {current_time}")
+            print(f"{output_filename}_{colour} complete at {current_time}")
         
         open(complete_flag_path, "x").close()
 
