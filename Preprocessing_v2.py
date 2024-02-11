@@ -14,15 +14,15 @@ def plot_signals_wave(signal_one, signal_two):
     """Plot and show two signals as waveforms on top of each other for 
         comparison.
 
-    Uses librosa library - https://github.com/librosa/librosa.
-    Uses matplotlib library - https://github.com/matplotlib/matplotlib.
+        Uses librosa library - https://github.com/librosa/librosa.
+        Uses matplotlib library - https://github.com/matplotlib/matplotlib.
 
-    Parameters:
-    -----------
-    signal_one : np.ndarray
-        First signal to be shown
-    signal_two : np.ndarray
-        Second signal to be shown
+        Parameters:
+        -----------
+        signal_one : np.ndarray
+            First signal to be shown
+        signal_two : np.ndarray
+            Second signal to be shown
     """
     fig, ax = plt.subplots(nrows=2, sharex=True)
 
@@ -39,17 +39,17 @@ def plot_signals_wave(signal_one, signal_two):
 def normalisation(signal):
     """Apply normalisation to signal.
 
-    Uses librosa library - https://github.com/librosa/librosa.
+        Uses librosa library - https://github.com/librosa/librosa.
 
-    Parameters:
-    -----------
-    signal : np.ndarray
-        The signal to apply normalisation to.
+        Parameters:
+        -----------
+        signal : np.ndarray
+            The signal to apply normalisation to.
 
-    Returns:
-    --------
-    augmented_signal : np.ndarray
-        The signal with normalisation applied.
+        Returns:
+        --------
+        augmented_signal : np.ndarray
+            The signal with normalisation applied.
     """
     augmented_signal = librosa.util.normalize(signal)
 
@@ -58,23 +58,24 @@ def normalisation(signal):
 def apply_noise(colour, signal, noise_factor, noise_variation):
     """Apply some colours of noise to signal.
 
-    Uses colorednoise library - https://github.com/felixpatzelt/colorednoise.
+        Uses colorednoise library - https://github.com/felixpatzelt/colorednoise.
+        Uses random library.
 
-    Parameters:
-    -----------
-    colour : str
-        Type of noise as string.
-    signal : np.ndarray
-        The signal to apply noise to.
-    noise_factor : int
-        Amount of noise to be applied to signal.
-    noise_variation : float > 0
-        Amount of variation to add to noise_factor. e.g., +- 0.01
+        Parameters:
+        -----------
+        colour : str
+            Type of noise as string.
+        signal : np.ndarray
+            The signal to apply noise to.
+        noise_factor : int
+            Amount of noise to be applied to signal.
+        noise_variation : float > 0
+            Amount of variation to add to noise_factor. e.g., +- 0.01
 
-    Returns:
-    --------
-    augmented_signal : np.ndarray
-        The signal with noise applied.
+        Returns:
+        --------
+        augmented_signal : np.ndarray
+            The signal with noise applied.
     """
     if colour == "white":
         exponent = 0
@@ -99,21 +100,21 @@ def apply_noise(colour, signal, noise_factor, noise_variation):
 def windowing(signal, sample_rate, window_length, overlap):
     '''Splits signal into windows of specified lenth with overlap between windows.
 
-    Parameters:
-    -----------
-    signal : np.ndarray
-        Signal to split into windows.
-    sample_rate : int > 0
-        Samplerate of provided signal.
-    window_length : int > 0
-        Length of window in milliseconds
-    overlap : int > 0
-        Overlap between windows as percentage decimal
+        Parameters:
+        -----------
+        signal : np.ndarray
+            Signal to split into windows.
+        sample_rate : int > 0
+            Samplerate of provided signal.
+        window_length : int > 0
+            Length of window in milliseconds.
+        overlap : int > 0
+            Overlap between windows as percentage decimal.
 
-    Returns:
-    --------
-    windowed_signal : 2d array
-        2d array of each window of the signal
+        Returns:
+        --------
+        windowed_signal : 2d array
+            2d array of each window of the signal.
     '''
     window_length_in_samples = int(window_length * sample_rate / 1000)
     overlap_in_samples = int(window_length_in_samples * overlap)
@@ -130,6 +131,21 @@ def windowing(signal, sample_rate, window_length, overlap):
     return windowed_signal
 
 def window_labels(file, window_length, overlap):
+    '''Takes a label file in and splits it into the specified window lengths with
+        overlaps.
+
+        Uses os library.
+        Uses re library.
+
+        Parameters:
+        -----------
+        file : str
+            path of file.
+        window_length : int
+            length of windows in milliseconds.
+        overlap : float > 0
+            percentage overlap between windows as a decimal.
+    '''
     output_filename = os.path.dirname(file).replace("\\", "_")
     output_path = os.path.join(os.path.dirname(file), "Augmented")
     window_length_seconds = window_length / 1000
@@ -173,15 +189,18 @@ def window_labels(file, window_length, overlap):
 def count_classes(file):
     '''Counts activity classes in the given file.
 
-    Parameters:
-    -----------
-    file : str
-        path of file.
+        Uses os library.
+        Uses re library.
 
-    Returns:
-    --------
-    labels : 2d list
-        2d list in the format [["activity0", count], ["activity1", count], ...]
+        Parameters:
+        -----------
+        file : str
+            path of file.
+
+        Returns:
+        --------
+        labels : 2d list
+            2d list in the format [["activity0", count], ["activity1", count], ...]
     '''
     labels = []
     input_label_file = open(os.path.join(file))
@@ -200,17 +219,17 @@ def count_classes(file):
 def join_label_lists(listOne, listTwo):
     '''Takes two of the label lists and adds listTwo to listOne.
 
-    Parameters:
-    -----------
-    listOne : list
-        2d label list
-    listTwo : list
-        2d label list
+        Parameters:
+        -----------
+        listOne : list
+            2d label list
+        listTwo : list
+            2d label list
 
-    Returns:
-    --------
-    listOne : list
-        2d label list
+        Returns:
+        --------
+        listOne : list
+            2d label list
     '''
     for x in listTwo:
         if not any(x[0] in sublist for sublist in listOne):
@@ -222,7 +241,7 @@ def join_label_lists(listOne, listTwo):
 
     return listOne
 
-def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
+def plot_mel_spectrogram(signal, sample_rate):
     '''Plots mel spectrogram from signal given.
     
         Uses librosa libray - https://github.com/librosa/librosa.
@@ -234,12 +253,9 @@ def plot_mel_spectrogram(signal, sample_rate, fig=None, ax=None):
             Signal to plot spectrogram of.
         sample_rate : int > 0
             Samplerate of provided signal.
-        fig : matplotlib figure, optional
-            The figure to use for plotting.
-        ax : matplotlib axis, optional
-            The axis to use for plotting.
 
         Returns:
+        --------
         ax : matplotlib axis
             The axis containing the mel spectrogram.
     '''
@@ -263,6 +279,8 @@ def process_file(file):
 
         Uses librosa library - https://github.com/librosa/librosa.
         Uses matplotlib library - https://github.com/matplotlib/matplotlib.
+        Uses os library.
+        Uses time library.
 
         Parameters:
         -----------
@@ -330,12 +348,15 @@ def apply_all_preprocessing(path, pool_size):
 
 def delete_augmented_dir(path):
     '''Deletes all Augmented directories from path, used to clear all files 
-    created by this program.
+        created by this program.
 
-    Parameters:
-    -----------
-    path : str
-        path of root directory.
+        Uses glob library.
+        Uses shutil library.
+
+        Parameters:
+        -----------
+        path : str
+            path of root directory.
     '''
     dirs = glob.glob(path + "/**/Augmented", recursive=True)
     for dir in dirs:
@@ -344,7 +365,14 @@ def delete_augmented_dir(path):
     print("Removing complete")
 
 def count_all_classes(path):
-    '''
+    '''Counts the classes in all the label files within the given directory.
+
+        Uses glob library.
+    
+        Parameters:
+        -----------
+        path : str
+            path of root directory.
     '''
     label_list = []
     for file in glob.iglob(os.path.join(path, "**/*.txt"), recursive=True):
