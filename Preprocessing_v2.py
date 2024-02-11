@@ -159,24 +159,16 @@ def window_labels(file, window_length, overlap):
             if window[1] < activity[2] and window[0] == "":
                 window[0] = activity[0]
             elif window[1] < activity[2] and window[2] > activity[1] and window[0] != activity[0]:
-                window[0] = [window[0], activity[0]]     
-
-    count = 0
-    for window in windowed_labels:
-        if isinstance(window[0], list):
-            activity_num = len(window[0])
-            activities = window[0][0]
-            for x in range(1,activity_num):
-                activities = f"{activities}, {window[0][x]}"
-            output = f"{window[1]}\t{window[2]}\t{activities}"
-        else:
-            output = f"{window[1]}\t{window[2]}\t{window[0]}"
-
-        f = open(os.path.join(output_path, f"{output_filename}_{count}_labels.txt"), "w")
-        f.write(output)
-        f.close()
-
-        count += 1
+                window[0] = [window[0], activity[0]]#only works for 2 activities   
+                
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    
+    for count, window in enumerate(windowed_labels):
+        activities_str = ", ".join(window[0]) if isinstance(window[0], list) else window[0]
+        output = f"{window[1]}\t{window[2]}\t{activities_str}"
+        with open(os.path.join(output_path, f"{output_filename}_{count}_labels.txt"), "w") as f:
+            f.write(output)
 
 def count_classes(file):
     '''Counts activity classes in the given file.
