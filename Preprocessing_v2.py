@@ -167,7 +167,7 @@ def window_labels(file, window_length, overlap):
     current_time = 0
 
     while current_time + window_length_seconds <= file_length:
-        interval_end = current_time + window_length / 1000
+        interval_end = current_time + window_length_seconds
         windowed_labels.append([[], current_time, interval_end])
         current_time = current_time + window_length_seconds - (window_length_seconds * overlap)
 
@@ -186,12 +186,13 @@ def window_labels(file, window_length, overlap):
         os.makedirs(output_path)
 
     for count, window in enumerate(windowed_labels):
-        f = open(os.path.join(output_path, f"{output_filename}_{count}_labels.txt"), "a")
-        for activity in window[0]:
-            start_time = f"{activity[1]:.6f}"
-            end_time = f"{activity[2]:.6f}"
-            output = f"{start_time}\t{end_time}\t{activity[0]}\n"
-            f.write(output)
+        output_file_path = os.path.join(output_path, f"{output_filename}_{count}_labels.txt")
+        with open(output_file_path, "a") as f:
+            for activity in window[0]:
+                start_time = f"{activity[1]:.6f}"
+                end_time = f"{activity[2]:.6f}"
+                output = f"{start_time}\t{end_time}\t{activity[0]}\n"
+                f.write(output)
 
 def count_classes(file):
     '''Counts activity classes in the given file.
